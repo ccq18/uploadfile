@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"> </script>
+    <script src="postFile.js"></script>
+    <script>
+        $(function(){
+            $('#testBtn').click(function(){
+                $.postFile(function(rs,isSuccess,fileForm){
+                    var result = $.parseJSON(rs);
+                    if(result.status ==200){
+                        $('#show_img').attr('src',result.data.url)
+                        $('#img_url').val(result.data.url)
+                    }else{
+                        alert('文件上传失败！');
+                    }
+
+                })
+            });
+        });
+
+    </script>
+</head>
+<body>
+<button id="testBtn">文件上传</button>
+<img src="" id="show_img">
+<input type="text" id="img_url">
+</body>
+</html>
