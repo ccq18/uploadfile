@@ -1,31 +1,35 @@
 ;
-$.postFile = function(callback){
-	/*生成file*/
-	var fileForm=$('<input  type="file" id="_file'+Math.random()+'" style="display: none">');
-	$('body').append(fileForm);
-	/*模拟点击*/
-	fileForm.click();
-	/*监听文件更改事件然后上传。*/
-	fileForm.change(function(){
-		var formData = new FormData();
-		$.postFile.option.data = formData;
-		formData.append($.postFile.option.formName, fileForm[0].files[0]);
-		$.ajax($.postFile.option).done(function(res) {
-			callback(res,true,fileForm);
-			fileForm.remove();
-		}).fail(function(res) {
-			callback(res,false,fileForm);
-			fileForm.remove();
-		});
-	});
+$.postFile = function(_callback,option){
+	option = $.extend({},$.postFile.option,option);
+	iframeName = '_iframe'+Math.random();
+	var iframe = $('<iframe name="'+iframeName+'" style="display:none;"></iframe>');
+	var file=$('<input  type="file" id="_file'+Math.random()+'" name="file" >');
+	var callbackName =  'callback'+parseInt(10000000*Math.random());
+	var form = $('<form target="'+iframeName+'" method="post" enctype="multipart/form-data"  action="'+option.url+'"  > <input value="'+callbackName+'" type="text" name="callback"></form>')
+	form.append(file);
+	file.change(function(){option.onEnd();form.submit();});
+	window[callbackName] = function(data){
+		option.onBegin();
+		_callback(data);
+		//移除资源
+		file.remove();
+		iframe.remove();
+		form.remove();
+		window[callbackName] =undefined;
+	}
+	$('body').append(iframe);
+	$('body').append(form);
+
+	file.click();
 }
 $.postFile.option = {
 	url: '/upload.php',//上传地址
 	formName:'file',//表单域名称
-	type: 'POST',
-	cache: false,
-	processData: false,
-	contentType: false
+	onBegin:function(){
+	},
+	onEnd:function(){
+
+	}
 };
 /*demo
  $('#testBtn').click(function(){
